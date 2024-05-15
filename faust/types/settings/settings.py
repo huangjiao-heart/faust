@@ -110,6 +110,7 @@ class Settings(base.SettingsRegistry):
         consumer_api_version: Optional[str] = None,
         consumer_max_fetch_size: Optional[int] = None,
         consumer_auto_offset_reset: Optional[str] = None,
+        enable_auto_commit: Optional[bool] = False,
         consumer_group_instance_id: Optional[str] = None,
         consumer_metadata_max_age_ms: Optional[int] = None,
         consumer_connections_max_idle_ms: Optional[int] = None,
@@ -1099,6 +1100,10 @@ class Settings(base.SettingsRegistry):
         exists, e.g. when starting a new consumer for the first time.
 
         Options include 'earliest', 'latest', 'none'.
+        """
+
+    def enable_auto_commit(self) -> str:
+        """enable auto commit.
         """
 
     @sections.Consumer.setting(
