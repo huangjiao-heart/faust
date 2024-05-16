@@ -462,6 +462,7 @@ class Consumer(Service, ConsumerT):
         self._commit_every = self.app.conf.broker_commit_every
         self.scheduler = self.app.conf.ConsumerScheduler()  # type: ignore
         self.commit_interval = commit_interval or self.app.conf.broker_commit_interval
+        self.enable_auto_commit = self.app.conf.enable_auto_commit
         self.commit_livelock_soft_timeout = (
             commit_livelock_soft_timeout
             or self.app.conf.broker_commit_livelock_soft_timeout
@@ -873,6 +874,9 @@ class Consumer(Service, ConsumerT):
 
     async def commit_and_end_transactions(self) -> None:
         """Commit all safe offsets and end transaction."""
+        if not self.enable_auto_commit:
+            return
+
         await self.commit(start_new_transaction=False)
 
     async def on_stop(self) -> None:
@@ -884,6 +888,9 @@ class Consumer(Service, ConsumerT):
 
     @Service.task
     async def _commit_handler(self) -> None:
+        if not self.enable_auto_commit:
+            return
+
         interval = self.commit_interval
 
         await self.sleep(interval)
@@ -1017,6 +1024,9 @@ class Consumer(Service, ConsumerT):
     async def _commit_offsets(
         self, offsets: Mapping[TP, int], start_new_transaction: bool = True
     ) -> bool:
+        if not self.enable_auto_commit:
+            return False
+
         table = terminal.logtable(
             [(str(tp), str(offset)) for tp, offset in offsets.items()],
             title="Commit Offsets",
@@ -1129,6 +1139,8 @@ class Consumer(Service, ConsumerT):
 
     async def on_task_error(self, exc: BaseException) -> None:
         """Call when processing a message failed."""
+        if not self.enable_auto_commit:
+            return
         await self.commit()
 
     async def _add_gap(self, tp: TP, offset_from: int, offset_to: int) -> None:
@@ -1455,6 +1467,8 @@ class ThreadDelegateConsumer(Consumer):
         return await self._thread.highwaters(*partitions)
 
     async def _commit(self, offsets: Mapping[TP, int]) -> bool:
+        if not self.enable_auto_commit:
+            return False
         return await self._thread.commit(offsets)
 
     def close(self) -> None:
