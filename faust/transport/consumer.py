@@ -876,7 +876,7 @@ class Consumer(Service, ConsumerT):
         """Commit all safe offsets and end transaction."""
         if not self.enable_auto_commit:
             return
-
+        self.log.info("commit_and_end_transactions")
         await self.commit(start_new_transaction=False)
 
     async def on_stop(self) -> None:
@@ -890,7 +890,7 @@ class Consumer(Service, ConsumerT):
     async def _commit_handler(self) -> None:
         if not self.enable_auto_commit:
             return
-
+        self.log.info("_commit_handler")
         interval = self.commit_interval
 
         await self.sleep(interval)
@@ -1026,7 +1026,7 @@ class Consumer(Service, ConsumerT):
     ) -> bool:
         if not self.enable_auto_commit:
             return False
-
+        self.log.info("_commit_offsets")
         table = terminal.logtable(
             [(str(tp), str(offset)) for tp, offset in offsets.items()],
             title="Commit Offsets",
@@ -1141,6 +1141,7 @@ class Consumer(Service, ConsumerT):
         """Call when processing a message failed."""
         if not self.enable_auto_commit:
             return
+        self.log.info("on_task_error")
         await self.commit()
 
     async def _add_gap(self, tp: TP, offset_from: int, offset_to: int) -> None:
@@ -1469,6 +1470,7 @@ class ThreadDelegateConsumer(Consumer):
     async def _commit(self, offsets: Mapping[TP, int]) -> bool:
         if not self.enable_auto_commit:
             return False
+        self.log.info("_commit")
         return await self._thread.commit(offsets)
 
     def close(self) -> None:
