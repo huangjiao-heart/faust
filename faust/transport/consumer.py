@@ -875,6 +875,7 @@ class Consumer(Service, ConsumerT):
     async def commit_and_end_transactions(self) -> None:
         """Commit all safe offsets and end transaction."""
         if not self.enable_auto_commit:
+            self.log.info("commit_and_end_transactions enable_auto_commit is False")
             return
         self.log.info("commit_and_end_transactions")
         await self.commit(start_new_transaction=False)
@@ -889,6 +890,7 @@ class Consumer(Service, ConsumerT):
     @Service.task
     async def _commit_handler(self) -> None:
         if not self.enable_auto_commit:
+            self.log.info("_commit_handler enable_auto_commit is False")
             return
         self.log.info("_commit_handler")
         interval = self.commit_interval
@@ -1025,6 +1027,7 @@ class Consumer(Service, ConsumerT):
         self, offsets: Mapping[TP, int], start_new_transaction: bool = True
     ) -> bool:
         if not self.enable_auto_commit:
+            self.log.info("_commit_offsets enable_auto_commit is False")
             return False
         self.log.info("_commit_offsets")
         table = terminal.logtable(
@@ -1140,6 +1143,7 @@ class Consumer(Service, ConsumerT):
     async def on_task_error(self, exc: BaseException) -> None:
         """Call when processing a message failed."""
         if not self.enable_auto_commit:
+            self.log.info("on_task_error enable_auto_commit is False")
             return
         self.log.info("on_task_error")
         await self.commit()
@@ -1469,6 +1473,7 @@ class ThreadDelegateConsumer(Consumer):
 
     async def _commit(self, offsets: Mapping[TP, int]) -> bool:
         if not self.enable_auto_commit:
+            self.log.info("_commit enable_auto_commit is False")
             return False
         self.log.info("_commit")
         return await self._thread.commit(offsets)
