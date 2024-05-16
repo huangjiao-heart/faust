@@ -1,5 +1,4 @@
 """Events received in streams."""
-
 import typing
 from types import TracebackType
 from typing import Any, Awaitable, Optional, Type, Union, cast
@@ -22,7 +21,8 @@ if typing.TYPE_CHECKING:  # pragma: no cover
     from .app.base import App as _App
 else:
 
-    class _App: ...  # noqa
+    class _App:
+        ...  # noqa
 
 
 USE_EXISTING_KEY = object()

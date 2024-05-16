@@ -1,5 +1,4 @@
 """In-memory cache backend."""
-
 import sys
 import time
 from contextlib import suppress

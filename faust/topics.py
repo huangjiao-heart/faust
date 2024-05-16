@@ -1,5 +1,4 @@
 """Topic - Named channel using Kafka."""
-
 import asyncio
 import re
 import typing
@@ -47,7 +46,8 @@ if typing.TYPE_CHECKING:  # pragma: no cover
     from .app import App as _App
 else:
 
-    class _App: ...  # noqa
+    class _App:
+        ...  # noqa
 
 
 __all__ = ["Topic"]
@@ -482,38 +482,26 @@ class Topic(SerializedChannel, TopicT):
 
     async def declare(self) -> None:
         """Declare/create this topic on the server."""
-        partitions: int
-        if self.partitions:
-            partitions = self.partitions
-        else:
+        partitions = self.partitions
+        if partitions is None:
             partitions = self.app.conf.topic_partitions
         replicas: int
-        if self.replicas:
-            replicas = self.replicas
-        else:
+        if self.replicas is None:
             replicas = self.app.conf.topic_replication_factor
+        else:
+            replicas = self.replicas
         if self.app.conf.topic_allow_declare:
             producer = await self._get_producer()
             for topic in self.topics:
                 await producer.create_topic(
                     topic=topic,
                     partitions=partitions,
-                    replication=replicas or 1,
+                    replication=replicas or 0,
                     config=self.config,
                     compacting=self.compacting,
                     deleting=self.deleting,
                     retention=self.retention,
                 )
-
-    def on_stop_iteration(self) -> None:
-        """Signal that iteration over this channel was stopped.
-        Tip:
-            Remember to call ``super`` when overriding this method.
-        """
-        super().on_stop_iteration()
-        if self.active_partitions is not None:
-            # Remove topics for isolated partitions from the Conductor.
-            self.app.topics.discard(cast(TopicT, self))
 
     def __aiter__(self) -> ChannelT:
         if self.is_iterator:

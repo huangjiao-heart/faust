@@ -1,4 +1,4 @@
-from unittest.mock import Mock
+from mode.utils.mocks import Mock
 
 from faust.livecheck.locals import current_execution, current_execution_stack
 

@@ -1,5 +1,4 @@
 """Fixups - Base implementation."""
-
 from typing import Iterable
 
 from faust.types import AppT, FixupT

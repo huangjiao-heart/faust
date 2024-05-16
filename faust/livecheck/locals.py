@@ -1,5 +1,4 @@
 """Locals - Current test & execution context."""
-
 import typing
 from typing import Optional
 
@@ -11,7 +10,8 @@ if typing.TYPE_CHECKING:
     from .runners import TestRunner as _TestRunner
 else:  # pragma: no cover
 
-    class _TestRunner: ...  # noqa
+    class _TestRunner:
+        ...  # noqa
 
 
 __all__ = [

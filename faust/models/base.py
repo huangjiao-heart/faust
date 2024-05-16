@@ -27,7 +27,6 @@ dictionaries, so the model describe the fields, and their types:
 Models are mainly used for describing the data in messages: both keys and
 values can be described as models.
 """
-
 import abc
 import warnings
 from datetime import datetime
@@ -243,8 +242,7 @@ class Model(ModelT):
         """
         if default_serializer is not None:
             warnings.warn(
-                DeprecationWarning("default_serializer deprecated, use: serializer"),
-                stacklevel=2,
+                DeprecationWarning("default_serializer deprecated, use: serializer")
             )
         ser = cls._options.serializer or serializer or default_serializer
         data = loads(ser, s)

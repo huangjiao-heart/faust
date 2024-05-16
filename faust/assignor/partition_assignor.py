@@ -1,13 +1,12 @@
 """Partition assignor."""
-
 import socket
 import zlib
 from collections import defaultdict
 from typing import Iterable, List, Mapping, MutableMapping, Sequence, Set, cast
 
-from aiokafka.cluster import ClusterMetadata
-from aiokafka.coordinator.assignors.abstract import AbstractPartitionAssignor
-from aiokafka.coordinator.protocol import (
+from kafka.cluster import ClusterMetadata
+from kafka.coordinator.assignors.abstract import AbstractPartitionAssignor
+from kafka.coordinator.protocol import (
     ConsumerProtocolMemberAssignment,
     ConsumerProtocolMemberMetadata,
 )
@@ -327,20 +326,8 @@ class PartitionAssignor(AbstractPartitionAssignor, PartitionAssignorT):  # type:
                     active_partitions = set(
                         assignment.actives.get(changelog_topic_name, [])
                     )
-
-                    # if we use_partitioner it could happen that we write in Worker A
-                    # to a partitions which is not active in Worker A but active in
-                    # Worker B. To let Worker B consume the update we have to have
-                    # all_partitions as standbys as well.
-                    # A similar situation is happening if Global tables are shared
-                    # over multiple consumer groups. Consumer group A could write to
-                    # the table and consumer group B, C, D only consuming. With the
-                    # synchronize_all_active_partitions flag it's possible to have
-                    # shared state over multiple consumer groups.
-                    if table.synchronize_all_active_partitions or table.use_partitioner:
-                        standby_partitions = all_partitions
-                    else:  # Only add those partitions as standby which aren't active
-                        standby_partitions = all_partitions - active_partitions
+                    # Only add those partitions as standby which aren't active
+                    standby_partitions = all_partitions - active_partitions
                     assignment.standbys[changelog_topic_name] = list(standby_partitions)
                     # We add all_partitions as active so they are recovered
                     # in the beginning.

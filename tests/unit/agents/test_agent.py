@@ -1,12 +1,11 @@
 import asyncio
-import platform
-from unittest.mock import ANY, call, patch
 
 import pytest
 from mode import SupervisorStrategy, label
 from mode.utils.aiter import aiter
 from mode.utils.futures import done_future
 from mode.utils.logging import CompositeLogger
+from mode.utils.mocks import ANY, AsyncMock, FutureMock, Mock, call, patch
 from mode.utils.trees import Node
 
 import faust
@@ -22,7 +21,6 @@ from faust.agents.replies import ReplyConsumer
 from faust.events import Event
 from faust.exceptions import ImproperlyConfigured
 from faust.types import TP, Message
-from tests.helpers import AsyncMock, FutureMock, Mock
 
 
 class Word(Record):
@@ -112,9 +110,9 @@ class Test_AgentService:
         )
         await agent._on_start_supervisor()
 
-        aref = agent._start_one.return_value
+        aref = agent._start_one.coro.return_value
 
-        agent._start_one.assert_has_calls(
+        agent._start_one.coro.assert_has_calls(
             [
                 call(
                     index=i,
@@ -124,7 +122,9 @@ class Test_AgentService:
                 for i in range(10)
             ]
         )
-        agent.supervisor.add.assert_has_calls([call(aref) for _ in range(10)])
+        agent.supervisor.add.assert_has_calls(
+            [call(agent._start_one.coro()) for i in range(10)]
+        )
         agent.supervisor.start.assert_called_once_with()
 
     def test_get_active_partitions(self, *, agent):
@@ -138,7 +138,7 @@ class Test_AgentService:
     async def test_replace_actor(self, *, agent):
         aref = Mock(name="aref", autospec=Actor)
         agent._start_one = AsyncMock(name="_start_one")
-        assert await agent._replace_actor(aref, 101) == agent._start_one.return_value
+        assert await agent._replace_actor(aref, 101) == agent._start_one.coro()
         agent._start_one.assert_called_once_with(
             index=101,
             active_partitions=aref.active_partitions,
@@ -204,25 +204,29 @@ class Test_Agent:
         with pytest.raises(AssertionError):
 
             @app.agent(app.topic("foo"), schema=faust.Schema(key_type=bytes))
-            async def foo(): ...
+            async def foo():
+                ...
 
     def test_init_key_type_and_channel(self, *, app):
         with pytest.raises(AssertionError):
 
             @app.agent(app.topic("foo"), key_type=bytes)
-            async def foo(): ...
+            async def foo():
+                ...
 
     def test_init_value_type_and_channel(self, *, app):
         with pytest.raises(AssertionError):
 
             @app.agent(app.topic("foo"), value_type=bytes)
-            async def foo(): ...
+            async def foo():
+                ...
 
     def test_isolated_partitions_cannot_have_concurrency(self, *, app):
         with pytest.raises(ImproperlyConfigured):
 
             @app.agent(isolated_partitions=True, concurrency=100)
-            async def foo(): ...
+            async def foo():
+                ...
 
     def test_agent_call_reuse_stream(self, *, agent, app):
         stream = app.stream("foo")
@@ -341,7 +345,7 @@ class Test_Agent:
         )
         ret = await agent._start_isolated(TP("foo", 0))
         agent._start_for_partitions.assert_called_once_with({TP("foo", 0)})
-        assert ret is agent._start_for_partitions.return_value
+        assert ret is agent._start_for_partitions.coro()
 
     @pytest.mark.asyncio
     async def test_on_shared_partitions_revoked(self, *, agent):
@@ -386,26 +390,25 @@ class Test_Agent:
         agent._prepare_actor = AsyncMock(name="_prepare_actor")
         ret = await agent._start_task(index=0)
         agent._prepare_actor.assert_called_once_with(ANY, agent.beacon)
-        assert ret is agent._prepare_actor.return_value
+        assert ret is agent._prepare_actor.coro()
 
     @pytest.mark.asyncio
-    async def test_prepare_actor__AsyncIterable(self, *, agent, monkeypatch):
-        async def mock_execute_actor(coro, aref):
-            await coro
-
-        mock_beacon = Mock(name="beacon", autospec=Node)
-        mock_slurp = AsyncMock(name="slurp")
-        monkeypatch.setattr(agent, "_slurp", mock_slurp)
-        monkeypatch.setattr(agent, "_execute_actor", mock_execute_actor)
+    async def test_prepare_actor__AsyncIterable(self, *, agent):
         aref = agent(index=0, active_partitions=None)
-        ret = await agent._prepare_actor(aref, mock_beacon)
-        task = aref.actor_task
-        await task
-        mock_slurp.assert_awaited()
-        assert mock_slurp.await_args.args[0] is aref
-        assert task._beacon is mock_beacon
-        assert aref in agent._actors
-        assert ret is aref
+        with patch("asyncio.Task") as Task:
+            agent._slurp = Mock(name="_slurp")
+            agent._execute_actor = Mock(name="_execute_actor")
+            beacon = Mock(name="beacon", autospec=Node)
+            ret = await agent._prepare_actor(aref, beacon)
+            agent._slurp.assert_called()
+            coro = agent._slurp()
+            agent._execute_actor.assert_called_once_with(coro, aref)
+            Task.assert_called_once_with(agent._execute_actor(), loop=agent.loop)
+            task = Task()
+            assert task._beacon is beacon
+            assert aref.actor_task is task
+            assert aref in agent._actors
+            assert ret is aref
 
     @pytest.mark.asyncio
     async def test_prepare_actor__Awaitable(self, *, agent2):
@@ -426,24 +429,22 @@ class Test_Agent:
             assert ret is aref
 
     @pytest.mark.asyncio
-    async def test_prepare_actor__Awaitable_with_multiple_topics(
-        self, *, agent2, monkeypatch
-    ):
+    async def test_prepare_actor__Awaitable_with_multiple_topics(self, *, agent2):
         aref = agent2(index=0, active_partitions=None)
+        asyncio.ensure_future(aref.it).cancel()  # silence warning
         agent2.channel.topics = ["foo", "bar"]
-        mock_beacon = Mock(name="beacon", autospec=Node)
-        mock_slurp = AsyncMock(name="slurp")
-        mock_execute_actor = AsyncMock(name="execute_actor")
-        monkeypatch.setattr(agent2, "_slurp", mock_slurp)
-        monkeypatch.setattr(agent2, "_execute_actor", mock_execute_actor)
-        ret = await agent2._prepare_actor(aref, mock_beacon)
-        task = aref.actor_task
-        mock_slurp.assert_not_called()
-        mock_slurp.assert_not_awaited()
-        mock_execute_actor.assert_called_with(aref, aref)
-        assert task._beacon is mock_beacon
-        assert aref in agent2._actors
-        assert ret is aref
+        with patch("asyncio.Task") as Task:
+            agent2._execute_actor = Mock(name="_execute_actor")
+            beacon = Mock(name="beacon", autospec=Node)
+            ret = await agent2._prepare_actor(aref, beacon)
+            coro = aref
+            agent2._execute_actor.assert_called_once_with(coro, aref)
+            Task.assert_called_once_with(agent2._execute_actor(), loop=agent2.loop)
+            task = Task()
+            assert task._beacon is beacon
+            assert aref.actor_task is task
+            assert aref in agent2._actors
+            assert ret is aref
 
     @pytest.mark.asyncio
     async def test_prepare_actor__Awaitable_cannot_have_sinks(self, *, agent2):
@@ -548,7 +549,7 @@ class Test_Agent:
         agent._reply.assert_called_once_with(
             None, word, word_req.reply_to, word_req.correlation_id
         )
-        agent._delegate_to_sinks.assert_has_calls(
+        agent._delegate_to_sinks.coro.assert_has_calls(
             [
                 call(word),
                 call("bar"),
@@ -595,7 +596,7 @@ class Test_Agent:
         await agent._slurp(aref, it)
 
         agent._reply.assert_called_once_with(None, word, "reply_to", "correlation_id")
-        agent._delegate_to_sinks.assert_has_calls(
+        agent._delegate_to_sinks.coro.assert_has_calls(
             [
                 call(word),
                 call("bar"),
@@ -740,10 +741,7 @@ class Test_Agent:
         with patch("faust.agents.agent.uuid4") as uuid4:
             uuid4.return_value = "vvv"
             reqrep = agent._create_req(
-                key=b"key",
-                value=b"value",
-                reply_to="reply_to",
-                headers={"k": "v"},
+                key=b"key", value=b"value", reply_to="reply_to", headers={"k": "v"}
             )[0]
 
             agent._get_strtopic.assert_called_once_with("reply_to")
@@ -758,10 +756,7 @@ class Test_Agent:
         with patch("faust.agents.agent.uuid4") as uuid4:
             uuid4.return_value = "vvv"
             value, h = agent._create_req(
-                key=b"key",
-                value=b"value",
-                reply_to="reply_to",
-                headers={"k": "v"},
+                key=b"key", value=b"value", reply_to="reply_to", headers={"k": "v"}
             )
 
             agent._get_strtopic.assert_called_once_with("reply_to")
@@ -777,10 +772,7 @@ class Test_Agent:
             uuid4.return_value = "vvv"
             value = Word("foo")
             reqrep = agent._create_req(
-                key=b"key",
-                value=value,
-                reply_to="reply_to",
-                headers={"h1": "h2"},
+                key=b"key", value=value, reply_to="reply_to", headers={"h1": "h2"}
             )[0]
             assert isinstance(reqrep, ReqRepRequest)
 
@@ -853,7 +845,7 @@ class Test_Agent:
             force=True,
         )
 
-        assert ret is agent.channel.send.return_value
+        assert ret is agent.channel.send.coro()
 
     @pytest.mark.asyncio
     async def test_send__without_reply_to(self, *, agent):
@@ -892,7 +884,7 @@ class Test_Agent:
             force=True,
         )
 
-        assert ret is agent.channel.send.return_value
+        assert ret is agent.channel.send.coro()
 
     def test_get_strtopic__agent(self, *, agent, agent2):
         assert agent._get_strtopic(agent2) == agent2.channel.get_topic_name()
@@ -954,9 +946,6 @@ class Test_Agent:
     def test_label(self, *, agent):
         assert label(agent)
 
-    @pytest.mark.skipif(
-        platform.python_implementation() == "PyPy", reason="Not yet supported on PyPy"
-    )
     async def test_context_calls_sink(self, *, agent):
         class SinkCalledException(Exception):
             pass

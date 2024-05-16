@@ -1,5 +1,4 @@
 """OpenTracing utilities."""
-
 import asyncio
 import sys
 import typing

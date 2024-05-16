@@ -14,6 +14,7 @@ classes = '''
     License :: OSI Approved :: BSD License
     Programming Language :: Python
     Programming Language :: Python :: 3 :: Only
+    Programming Language :: Python :: 3.6
     Operating System :: POSIX
     Operating System :: POSIX :: Linux
     Operating System :: MacOS :: MacOS X
@@ -95,7 +96,7 @@ setup(
     license='BSD',
     packages=find_packages(exclude=['ez_setup', 'tests', 'tests.*']),
     include_package_data=True,
-    python_requires='>=3.8.0',
+    python_requires='>=3.6.0',
     keywords=[],
     zip_safe=False,
     install_requires=reqs('default.txt'),

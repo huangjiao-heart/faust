@@ -4,8 +4,6 @@ import random
 import subprocess
 import sys
 
-import pytest
-
 from tests.consistency.consistency_checker import ConsistencyChecker
 
 
@@ -178,7 +176,6 @@ class Stresser(object):
         await proc.wait()
 
 
-@pytest.mark.skip(reason="Needs fixing")
 async def test_consistency(loop):
     stresser = Stresser(num_workers=4, num_producers=4, loop=loop)
     checker = ConsistencyChecker(

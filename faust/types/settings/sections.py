@@ -27,7 +27,8 @@ if typing.TYPE_CHECKING:
     from .params import Param as _Param
 else:
 
-    class _Param(Generic[IT, OT]): ...  # noqa: E701
+    class _Param(Generic[IT, OT]):
+        ...  # noqa: E701
 
 
 class SectionType(Enum):

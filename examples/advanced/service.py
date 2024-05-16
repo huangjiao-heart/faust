@@ -41,7 +41,7 @@ async def consumer(stream):
 
 @app.timer(1.0)
 async def producer():
-    await consumer.send(value='hello')
+    await consumer.send('hello')
 
 
 if __name__ == '__main__':

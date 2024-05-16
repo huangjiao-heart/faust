@@ -1,1 +1,1 @@
-faust-cchardet
+cchardet>=2.1

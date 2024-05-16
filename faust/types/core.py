@@ -18,7 +18,8 @@ if typing.TYPE_CHECKING:
     from .models import ModelT as _ModelT
 else:
 
-    class _ModelT: ...  # noqa
+    class _ModelT:
+        ...  # noqa
 
 
 __all__ = ["K", "V"]
@@ -76,6 +77,6 @@ def merge_headers(target: OpenHeadersArg, source: Mapping[str, Any]) -> None:
         source = {want_str(k): want_bytes(v) for k, v in source.items()}
         if isinstance(target, Mapping):
             target = cast(MutableMapping, target)
-            target.update({k: v for k, v in source.items()})  # noqa: C416
+            target.update({k: v for k, v in source.items()})
         elif isinstance(target, list):
             target.extend((h for h in source.items()))

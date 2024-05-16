@@ -1,6 +1,5 @@
-from unittest.mock import Mock
-
 import pytest
+from mode.utils.mocks import Mock
 
 from faust import Event, Stream, Table, Topic, web
 from faust.assignor import PartitionAssignor

@@ -1,5 +1,4 @@
 """LiveCheck Signals - Test communication and synchronization."""
-
 import asyncio
 import typing
 from time import monotonic
@@ -17,7 +16,8 @@ if typing.TYPE_CHECKING:
     from .case import Case as _Case
 else:
 
-    class _Case: ...  # noqa
+    class _Case:
+        ...  # noqa
 
 
 __all__ = ["BaseSignal", "Signal"]

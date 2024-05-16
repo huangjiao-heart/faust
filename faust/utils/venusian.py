@@ -3,7 +3,6 @@
 We define our own interface so we don't have to specify the
 callback argument.
 """
-
 from typing import Any, Callable
 
 import venusian
@@ -17,7 +16,7 @@ def attach(
     category: str,
     *,
     callback: Callable[[Scanner, str, Any], None] = None,
-    **kwargs: Any,
+    **kwargs: Any
 ) -> None:
     """Shortcut for :func:`venusian.attach`.
 
@@ -27,4 +26,5 @@ def attach(
     return _attach(fun, callback, category=category, **kwargs)
 
 
-def _on_found(scanner: venusian.Scanner, name: str, obj: Any) -> None: ...
+def _on_found(scanner: venusian.Scanner, name: str, obj: Any) -> None:
+    ...

@@ -1,5 +1,4 @@
 """LiveCheck - Faust Application."""
-
 import asyncio
 from datetime import timedelta
 from typing import (

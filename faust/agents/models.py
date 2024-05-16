@@ -1,5 +1,4 @@
 """Models used by agents internally."""
-
 from typing import Any
 
 from faust.models import Record

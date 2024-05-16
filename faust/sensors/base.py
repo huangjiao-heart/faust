@@ -1,5 +1,4 @@
 """Base-interface for sensors."""
-
 from time import monotonic
 from typing import Any, Dict, Iterator, Mapping, Optional, Set
 
@@ -144,7 +143,8 @@ class Sensor(SensorT, Service):
         """Web server finished working on request."""
         ...
 
-    def on_threaded_producer_buffer_processed(self, app: AppT, size: int) -> None: ...
+    def on_threaded_producer_buffer_processed(self, app: AppT, size: int) -> None:
+        ...
 
     def asdict(self) -> Mapping:
         """Convert sensor state to dictionary."""

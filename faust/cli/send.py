@@ -1,5 +1,4 @@
 """Program ``faust send`` used to send events to agents and topics."""
-
 import asyncio
 import random
 from typing import Any, Optional
@@ -83,7 +82,5 @@ class send(AppCommand):
             meta: RecordMetadata = await fut_send_complete
             self.say(self.dumps(meta._asdict()))
             if i and max_latency:
-                await asyncio.sleep(
-                    random.uniform(min_latency, max_latency)  # nosec B311
-                )
+                await asyncio.sleep(random.uniform(min_latency, max_latency))
         await self.app.producer.stop()

@@ -1,5 +1,4 @@
 """In-memory table storage."""
-
 from typing import Any, Callable, Iterable, MutableMapping, Optional, Set, Tuple, Union
 
 from faust.types import TP, EventT

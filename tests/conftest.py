@@ -3,20 +3,19 @@ import threading
 import time
 from http import HTTPStatus
 from typing import Any, NamedTuple, Optional
-from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 from _pytest.assertion.util import _compare_eq_dict, _compare_eq_set
 from aiohttp.client import ClientError, ClientSession
 from aiohttp.web import Response
 from mode.utils.futures import all_tasks
-
-from tests.helpers import AsyncContextManagerMock, AsyncMock
+from mode.utils.mocks import AsyncContextManagerMock, AsyncMock, MagicMock, Mock, patch
 
 sentinel = object()
 
 
-class DirtyTest(Exception): ...
+class DirtyTest(Exception):
+    ...
 
 
 @pytest.fixture()
@@ -132,7 +131,7 @@ def mock_http_client(*, app, monkeypatch, request) -> ClientSession:
         if 400 <= options.status_code:
             raise ClientError()
 
-    response = Mock(
+    response = AsyncMock(
         autospec=Response,
         text=AsyncMock(return_value=options.text),
         read=AsyncMock(return_value=options.text),

@@ -47,7 +47,8 @@ if typing.TYPE_CHECKING:
     from faust.types.worker import Worker as _WorkerT
 else:
 
-    class _WorkerT: ...  # noqa
+    class _WorkerT:
+        ...  # noqa
 
 
 # XXX mypy borks if we do `from faust import __version__`
@@ -193,7 +194,8 @@ class Settings(base.SettingsRegistry):
         stream_ack_exceptions: Optional[bool] = None,
         url: URLArg = None,
         **kwargs: Any,
-    ) -> None: ...  # replaced by __init_subclass__ in BaseSettings
+    ) -> None:
+        ...  # replaced by __init_subclass__ in BaseSettings
 
     def on_init(self, id: str, **kwargs: Any) -> None:
         # version is required for the id
@@ -1102,7 +1104,7 @@ class Settings(base.SettingsRegistry):
         Options include 'earliest', 'latest', 'none'.
         """
 
-    def enable_auto_commit(self) -> str:
+    def enable_auto_commit(self) -> bool:
         """enable auto commit.
         """
 

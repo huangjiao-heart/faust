@@ -4,11 +4,7 @@ class Test_Arena:
         assert not exitcode
 
         assert model == [
-            {
-                "field": "points",
-                "type": "typing.List[__main__.Point]",
-                "default": "*",
-            },
+            {"field": "points", "type": "typing.List[__main__.Point]", "default": "*"},
             {"field": "timestamp", "type": "float", "default": "None"},
         ]
 

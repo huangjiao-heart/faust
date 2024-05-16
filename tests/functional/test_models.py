@@ -169,10 +169,7 @@ def test_datetimes():
     assert OptionalDate.loads(OptionalDate(date=n1).dumps()).date == n1
     assert OptionalDate.loads(OptionalDate(date=None).dumps()).date is None
     n2 = datetime.utcnow()
-    assert ListOfDate.loads(ListOfDate(dates=[n1, n2]).dumps()).dates == [
-        n1,
-        n2,
-    ]
+    assert ListOfDate.loads(ListOfDate(dates=[n1, n2]).dumps()).dates == [n1, n2]
     assert (
         OptionalListOfDate.loads(OptionalListOfDate(dates=None).dumps()).dates is None
     )
@@ -185,10 +182,7 @@ def test_datetimes():
     assert OptionalListOfDate2.loads(
         OptionalListOfDate2(dates=[n1, n2]).dumps()
     ).dates == [n1, n2]
-    assert TupleOfDate.loads(TupleOfDate(dates=(n1, n2)).dumps()).dates == (
-        n1,
-        n2,
-    )
+    assert TupleOfDate.loads(TupleOfDate(dates=(n1, n2)).dumps()).dates == (n1, n2)
     assert TupleOfDate.loads(TupleOfDate(dates=(n2,)).dumps()).dates == (n2,)
     assert SetOfDate.loads(SetOfDate(dates={n1, n2}).dumps()).dates == {n1, n2}
     assert MapOfDate.loads(MapOfDate(dates={"A": n1, "B": n2}).dumps()).dates == {
@@ -226,10 +220,7 @@ def test_datetimes__isodates_compat():
     n1 = datetime.utcnow()
     assert Date.loads(Date(date=n1).dumps()).date == n1
     n2 = datetime.utcnow()
-    assert ListOfDate.loads(ListOfDate(dates=[n1, n2]).dumps()).dates == [
-        n1,
-        n2,
-    ]
+    assert ListOfDate.loads(ListOfDate(dates=[n1, n2]).dumps()).dates == [n1, n2]
     assert (
         OptionalListOfDate.loads(OptionalListOfDate(dates=None).dumps()).dates is None
     )
@@ -242,10 +233,7 @@ def test_datetimes__isodates_compat():
     assert OptionalListOfDate2.loads(
         OptionalListOfDate2(dates=[n1, n2]).dumps()
     ).dates == [n1, n2]
-    assert TupleOfDate.loads(TupleOfDate(dates=(n1, n2)).dumps()).dates == (
-        n1,
-        n2,
-    )
+    assert TupleOfDate.loads(TupleOfDate(dates=(n1, n2)).dumps()).dates == (n1, n2)
     assert TupleOfDate.loads(TupleOfDate(dates=(n2,)).dumps()).dates == (n2,)
     assert SetOfDate.loads(SetOfDate(dates={n1, n2}).dumps()).dates == {n1, n2}
     assert MapOfDate.loads(MapOfDate(dates={"A": n1, "B": n2}).dumps()).dates == {
@@ -406,9 +394,8 @@ def test_custom_coercion():
         def __repr__(self):
             return f"<{type(self).__name__}: {self.value}>"
 
-    class CanFooModel(
-        Record, abstract=True, coercions={Foo: Foo}, serializer="json"
-    ): ...
+    class CanFooModel(Record, abstract=True, coercions={Foo: Foo}, serializer="json"):
+        ...
 
     class IsFoo(CanFooModel, serializer="json"):
         foo: Foo
@@ -659,9 +646,7 @@ class Test_FieldDescriptor:
         Account(id="123", name="123"),
         Account(id="123", name="123", active=False),
         User(
-            id="123",
-            username="foo",
-            account=Account(id="123", name="Foo", active=True),
+            id="123", username="foo", account=Account(id="123", name="Foo", active=True)
         ),
         User(id="123", username="foo", account=None),
         User(id=None, username=None, account=None),
@@ -954,6 +939,7 @@ def test_adtribute_payload(app):
             self.data_store = None
 
     class AdjustData(Record):
+
         activity_kind: str
         network_name: str
         adid: str
@@ -1012,6 +998,7 @@ def test_adtribute_payload(app):
 
 
 def test_overwrite_asdict():
+
     with pytest.raises(RuntimeError):
 
         class R(Record):
@@ -1119,7 +1106,8 @@ def test_subclass_inherit_flags(flag, expected_default):
 
 
 def test_abstract_model_repr():
-    class MyBase(faust.Record, abstract=True): ...
+    class MyBase(faust.Record, abstract=True):
+        ...
 
     assert MyBase.__is_abstract__
     with pytest.raises(NotImplementedError):
@@ -1127,6 +1115,7 @@ def test_abstract_model_repr():
 
 
 def test_raises_when_defaults_in_wrong_order():
+
     with pytest.raises(TypeError):
 
         class X(Record):
@@ -1464,10 +1453,7 @@ def test_payload_with_reserved_keyword():
     class X(Record):
         location: str = StringField(input_name="in")
         foo: str = StringField(
-            required=False,
-            default="BAR",
-            input_name="bar",
-            output_name="foobar",
+            required=False, default="BAR", input_name="bar", output_name="foobar"
         )
 
     with pytest.raises(TypeError):

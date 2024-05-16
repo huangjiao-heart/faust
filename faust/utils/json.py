@@ -1,5 +1,4 @@
 """JSON utilities."""
-
 import datetime
 import enum
 import typing
@@ -69,7 +68,7 @@ except ImportError:  # pragma: no cover
 DECIMAL_MAXLEN = 1000
 
 #: Types that we convert to lists.
-SEQUENCE_TYPES: TypeTuple[Iterable] = (set, frozenset, deque, tuple)
+SEQUENCE_TYPES: TypeTuple[Iterable] = (set, frozenset, deque)
 
 DateTypeTuple = Tuple[Union[Type[datetime.date], Type[datetime.time]], ...]
 DatetimeTypeTuple = Tuple[
@@ -176,7 +175,6 @@ if orjson is not None:  # pragma: no cover
         return json_dumps(
             obj,
             default=on_default,
-            option=orjson.OPT_NON_STR_KEYS | orjson.OPT_UTC_Z,
         )
 
     def loads(s: str, json_loads: Callable = orjson.loads, **kwargs: Any) -> Any:

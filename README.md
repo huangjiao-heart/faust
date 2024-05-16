@@ -2,14 +2,13 @@
 
 # Python Stream Processing Fork
 
-![python versions](https://img.shields.io/pypi/pyversions/faust-streaming.svg)
-![version](https://img.shields.io/pypi/v/faust-streaming)
+![python versions](https://img.shields.io/badge/python-3.6%20%7C%203.7%20%7C%203.8%20%7C%203.9%20%7C%203.10-blue)
+![version](https://img.shields.io/badge/version-0.8.10-green)
 [![codecov](https://codecov.io/gh/faust-streaming/faust/branch/master/graph/badge.svg?token=QJFBYNN0JJ)](https://codecov.io/gh/faust-streaming/faust)
-[![slack](https://img.shields.io/badge/slack-Faust-brightgreen.svg?logo=slack)](https://join.slack.com/t/fauststreaming/shared_invite/zt-1q1jhq4kh-Q1t~rJgpyuMQ6N38cByE9g)
+[![slack](https://img.shields.io/badge/slack-Faust-brightgreen.svg?logo=slack)](https://fauststream.slack.com/)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 ![pre-commit](https://img.shields.io/badge/pre--commit-enabled-green)
 ![license](https://img.shields.io/pypi/l/faust-streaming)
-![downloads](https://img.shields.io/pypi/dw/faust-streaming)
 
 ## Installation
 
@@ -258,7 +257,7 @@ increase once we can support a more optimized Kafka client.
 Faust is just Python, and a stream is an infinite asynchronous iterator.
 If you know how to use Python, you already know how to use Faust,
 and it works with your favorite Python libraries like Django, Flask,
-SQLAlchemy, NLTK, NumPy, SciPy, TensorFlow, etc.
+SQLAlchemy, NTLK, NumPy, SciPy, TensorFlow, etc.
 
 ## Bundles
 
@@ -269,9 +268,9 @@ You can specify these in your requirements or on the ``pip``
 command-line by using brackets. Separate multiple bundles using the comma:
 
 ```sh
-pip install "faust-streaming[rocksdb]"
+pip install "faust[rocksdb]"
 
-pip install "faust-streaming[rocksdb,uvloop,fast,redis,aerospike]"
+pip install "faust[rocksdb,uvloop,fast,redis, aerospike]"
 ```
 
 The following bundles are available:
@@ -280,18 +279,9 @@ The following bundles are available:
 
 ### Stores
 
-#### RocksDB
+`pip install faust[rocksdb]` for using `RocksDB` for storing Faust table state. **Recommended in production.**
 
-For using `RocksDB` for storing Faust table state. **Recommended in production.**
-
-`pip install faust-streaming[rocksdb]` (uses RocksDB 6)
-
-`pip install faust-streaming[rocksdict]` (uses RocksDB 8, not backwards compatible with 6)
-
-
-#### Aerospike
-
-`pip install faust-streaming[aerospike]` for using `Aerospike` for storing Faust table state. **Recommended if supported**
+`pip install faust[aerospike]` for using `Aerospike` for storing Faust table state. **Recommended if supported**
 
 ### Aerospike Configuration
 Aerospike can be enabled as the state store by specifying
@@ -316,35 +306,35 @@ The following configuration options should be passed in as keys to the options p
 
 ### Caching
 
-`faust-streaming[redis]` for using `Redis` as a simple caching backend (Memcached-style).
+`faust[redis]` for using `Redis` as a simple caching backend (Memcached-style).
 
 ### Codecs
 
-`faust-streaming[yaml]` for using YAML and the `PyYAML` library in streams.
+`faust[yaml]` for using YAML and the `PyYAML` library in streams.
 
 ### Optimization
 
-`faust-streaming[fast]` for installing all the available C speedup extensions to Faust core.
+`faust[fast]` for installing all the available C speedup extensions to Faust core.
 
 ### Sensors
 
-`faust-streaming[datadog]` for using the `Datadog` Faust monitor.
+`faust[datadog]` for using the `Datadog` Faust monitor.
 
-`faust-streaming[statsd]` for using the `Statsd` Faust monitor.
+`faust[statsd]` for using the `Statsd` Faust monitor.
 
-`faust-streaming[prometheus]` for using the `Prometheus` Faust monitor.
+`faust[prometheus]` for using the `Prometheus` Faust monitor.
 
 ### Event Loops
 
-`faust-streaming[uvloop]` for using Faust with `uvloop`.
+`faust[uvloop]` for using Faust with `uvloop`.
 
-`faust-streaming[eventlet]` for using Faust with `eventlet`
+`faust[eventlet]` for using Faust with `eventlet`
 
 ### Debugging
 
-`faust-streaming[debug]` for using `aiomonitor` to connect and debug a running Faust worker.
+`faust[debug]` for using `aiomonitor` to connect and debug a running Faust worker.
 
-`faust-streaming[setproctitle]`when the `setproctitle` module is installed the Faust worker will use it to set a nicer process name in `ps`/`top` listings.vAlso installed with the `fast` and `debug` bundles.
+`faust[setproctitle]`when the `setproctitle` module is installed the Faust worker will use it to set a nicer process name in `ps`/`top` listings.vAlso installed with the `fast` and `debug` bundles.
 
 ## Downloading and installing from source
 
@@ -386,7 +376,7 @@ Using `eventlet` requires you to install the `faust-aioeventlet` module,
 and you can install this as a bundle along with Faust:
 
 ```sh
-pip install -U faust-streaming[eventlet]
+pip install -U faust[eventlet]
 ```
 
 Then to actually use eventlet as the event loop you have to either
@@ -416,7 +406,7 @@ Yes! Use the `asyncio` reactor implementation: https://twistedmatrix.com/documen
 
 ### Will you support Python 2.7 or Python 3.5
 
-No. Faust requires Python 3.8 or later, since it heavily uses features that were
+No. Faust requires Python 3.6 or later, since it heavily uses features that were
 introduced in Python 3.6 (`async`, `await`, variable type annotations).
 
 ### I get a maximum number of open files exceeded error by RocksDB when running a Faust app locally. How can I fix this
@@ -442,7 +432,7 @@ Faust supports kafka with version >= 0.10.
 For discussions about the usage, development, and future of Faust, please join the `fauststream` Slack.
 
 - https://fauststream.slack.com
-- Sign-up: https://join.slack.com/t/fauststreaming/shared_invite/zt-1q1jhq4kh-Q1t~rJgpyuMQ6N38cByE9g
+- Sign-up: https://join.slack.com/t/fauststream/shared_invite/enQtNDEzMTIyMTUyNzU2LTIyMjNjY2M2YzA2OWFhMDlmMzVkODk3YTBlYThlYmZiNTUwZDJlYWZiZTdkN2Q4ZGU4NWM4YWMyNTM5MGQ5OTg
 
 ## Resources
 

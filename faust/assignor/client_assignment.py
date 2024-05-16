@@ -1,5 +1,4 @@
 """Client Assignment."""
-
 import copy
 from typing import List, Mapping, MutableMapping, Sequence, Set, Tuple, cast
 

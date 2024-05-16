@@ -4,15 +4,6 @@
   Introducing Faust
 =====================
 
-.. image:: https://img.shields.io/pypi/v/faust-streaming.svg
-    :target: https://pypi.python.org/pypi/faust-streaming/
-
-.. image:: https://img.shields.io/pypi/pyversions/faust-streaming.svg
-    :target: https://pypi.org/project/faust-streaming/
-
-.. image:: https://img.shields.io/pypi/dm/faust-streaming
-   :target: https://pypi.python.org/pypi/faust-streaming/
-
 .. include:: includes/tags.txt
 
 **Table of Contents**
@@ -155,14 +146,14 @@ What do I need?
 
     **Core**
 
-    - Python 3.8 or later.
+    - Python 3.6 or later.
     - Kafka 0.10.1 or later.
 
     **Extensions**
 
     - RocksDB 5.0 or later, :pypi:`python-rocksdb`
 
-Faust requires Python 3.8 or later, and a running Kafka broker.
+Faust requires Python 3.6 or later, and a running Kafka broker.
 
 There's no plan to support earlier Python versions.
 Please get in touch if this is something you want to work on.
@@ -174,53 +165,53 @@ Extensions
 +--------------+-------------+--------------------------------------------------+
 | **Name**     | **Version** | **Bundle**                                       |
 +--------------+-------------+--------------------------------------------------+
-| ``rocksdb``  | 5.0         | ``pip install faust-streaming[rocksdb]``         |
+| ``rocksdb``  | 5.0         | ``pip install faust[rocksdb]``                   |
 +--------------+-------------+--------------------------------------------------+
-| ``redis``    | aredis 1.1  | ``pip install faust-streaming[redis]``           |
+| ``redis``    | aredis 1.1  | ``pip install faust[redis]``                     |
 +--------------+-------------+--------------------------------------------------+
-| ``datadog``  | 0.20.0      | ``pip install faust-streaming[datadog]``         |
+| ``datadog``  | 0.20.0      | ``pip install faust[datadog]``                   |
 +--------------+-------------+--------------------------------------------------+
-| ``statsd``   | 3.2.1       | ``pip install faust-streaming[statsd]``          |
+| ``statsd``   | 3.2.1       | ``pip install faust[statsd]``                    |
 +--------------+-------------+--------------------------------------------------+
-| ``uvloop``   | 0.8.1       | ``pip install faust-streaming[uvloop]``          |
+| ``uvloop``   | 0.8.1       | ``pip install faust[uvloop]``                    |
 +--------------+-------------+--------------------------------------------------+
-| ``eventlet`` | 1.16.0      | ``pip install faust-streaming[eventlet]``        |
+| ``eventlet`` | 1.16.0      | ``pip install faust[eventlet]``                  |
 +--------------+-------------+--------------------------------------------------+
-| ``yaml``     | 5.1.0       | ``pip install faust-streaming[yaml]``            |
+| ``yaml``     | 5.1.0       | ``pip install faust[yaml]``                      |
 +--------------+-------------+--------------------------------------------------+
 
 Optimizations
 -------------
 
-These can be all installed using ``pip install faust-streaming[fast]``:
+These can be all installed using ``pip install faust[fast]``:
 
 +------------------+-------------+--------------------------------------------------+
 | **Name**         | **Version** | **Bundle**                                       |
 +------------------+-------------+--------------------------------------------------+
-| ``aiodns``       | 1.1.0       | ``pip install faust-streaming[aiodns]``          |
+| ``aiodns``       | 1.1.0       | ``pip install faust[aiodns]``                    |
 +------------------+-------------+--------------------------------------------------+
-| ``cchardet``     | 1.1.0       | ``pip install faust-streaming[cchardet]``        |
+| ``cchardet``     | 1.1.0       | ``pip install faust[cchardet]``                  |
 +------------------+-------------+--------------------------------------------------+
-| ``ciso8601``     | 2.1.0       | ``pip install faust-streaming[ciso8601]``        |
+| ``ciso8601``     | 2.1.0       | ``pip install faust[ciso8601]``                  |
 +------------------+-------------+--------------------------------------------------+
-| ``cython``       | 0.9.26      | ``pip install faust-straming[cython]``           |
+| ``cython``       | 0.9.26      | ``pip install faust[cython]``                    |
 +------------------+-------------+--------------------------------------------------+
-| ``orjson``       | 2.0.0       | ``pip install faust-streaming[orjson]``          |
+| ``orjson``       | 2.0.0       | ``pip install faust[orjson]``                    |
 +------------------+-------------+--------------------------------------------------+
-| ``setproctitle`` | 1.1.0       | ``pip install faust-streaming[setproctitle]``    |
+| ``setproctitle`` | 1.1.0       | ``pip install faust[setproctitle]``              |
 +------------------+-------------+--------------------------------------------------+
 
 Debugging extras
 ----------------
 
-These can be all installed using ``pip install faust-streaming[debug]``:
+These can be all installed using ``pip install faust[debug]``:
 
 +------------------+-------------+--------------------------------------------------+
 | **Name**         | **Version** | **Bundle**                                       |
 +------------------+-------------+--------------------------------------------------+
-| ``aiomonitor``   | 0.3         | ``pip install faust-streaming[aiomonitor]``      |
+| ``aiomonitor``   | 0.3         | ``pip install faust[aiomonitor]``                |
 +------------------+-------------+--------------------------------------------------+
-| ``setproctitle`` | 1.1.0       | ``pip install faust-streaming[setproctitle]``    |
+| ``setproctitle`` | 1.1.0       | ``pip install faust[setproctitle]``              |
 +------------------+-------------+--------------------------------------------------+
 
 .. note::
@@ -234,7 +225,7 @@ These can be all installed using ``pip install faust-streaming[debug]``:
 
     .. sourcecode:: console
 
-        $ pip install faust-streaming[uvloop,fast,rocksdb,datadog,redis]
+        $ pip install faust[uvloop,fast,rocksdb,datadog,redis]
 
 .. admonition:: RocksDB On MacOS Sierra
 

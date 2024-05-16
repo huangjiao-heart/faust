@@ -12,6 +12,7 @@ from .models import Error
 
 
 class LogPusher(Service):
+
     app: faust.App
     queue: asyncio.Queue
 
@@ -35,6 +36,7 @@ class LogPusher(Service):
 
 
 class LogHandler(logging.Handler):
+
     app: faust.App
 
     def __init__(self, app: faust.App, *args: Any, **kwargs: Any) -> None:

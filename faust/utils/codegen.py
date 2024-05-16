@@ -1,5 +1,4 @@
 """Utilities for generating code at runtime."""
-
 from typing import Any, Callable, Dict, List, Mapping, Tuple, cast
 
 __all__ = [
@@ -97,7 +96,7 @@ def build_closure(
     assert locals is not None
     if return_type is not MISSING:
         locals["_return_type"] = return_type
-    exec(source, globals, locals)  # nosec: B102
+    exec(source, globals, locals)
     obj = locals[outer_name](*args)
     obj.__sourcecode__ = source
     return cast(Callable, obj)
@@ -115,7 +114,7 @@ def build_function(
     assert locals is not None
     if return_type is not MISSING:
         locals["_return_type"] = return_type
-    exec(source, globals, locals)  # nosec: B102
+    exec(source, globals, locals)
     obj = locals[name]
     obj.__sourcecode__ = source
     return cast(Callable, obj)

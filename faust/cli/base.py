@@ -1,5 +1,4 @@
 """Command-line programs using :pypi:`click`."""
-
 import abc
 import asyncio
 import inspect
@@ -21,7 +20,6 @@ from typing import (
     List,
     Mapping,
     MutableSequence,
-    NoReturn,
     Optional,
     Sequence,
     Tuple,
@@ -37,6 +35,7 @@ from mode import Service, ServiceT, Worker
 from mode.utils import text
 from mode.utils.compat import want_bytes
 from mode.utils.imports import import_from_cwd, symbol_by_name
+from mode.utils.typing import NoReturn
 from mode.worker import exiting
 
 from faust.types import AppT, CodecArg, ModelT
@@ -50,7 +49,8 @@ if typing.TYPE_CHECKING:
     from faust.app import App as _App
 else:
 
-    class _App: ...  # noqa
+    class _App:
+        ...  # noqa
 
 
 try:
@@ -527,7 +527,6 @@ class Command(abc.ABC):  # noqa: B024
     @classmethod
     def as_click_command(cls) -> Callable:  # pragma: no cover
         """Convert command into :pypi:`click` command."""
-
         # This is what actually registers the commands into the
         # :pypi:`click` command-line interface (the ``def cli`` main above).
         # __init_subclass__ calls this for the side effect of being
@@ -593,8 +592,8 @@ class Command(abc.ABC):  # noqa: B024
         self._blocking_timeout = self.state.blocking_timeout
         self._console_port = self.state.console_port
 
-    @no_type_check  # Subclasses can omit *args, **kwargs in signature.  # noqa: B027
-    async def run(self, *args: Any, **kwargs: Any) -> Any:  # noqa: B027
+    @no_type_check  # Subclasses can omit *args, **kwargs in signature.
+    async def run(self, *args: Any, **kwargs: Any) -> Any:
         """Override this method to define what your command does."""
         # NOTE: If you override __call__ below, you have a non-async command.
         # This is used by .worker to call the
@@ -608,7 +607,7 @@ class Command(abc.ABC):  # noqa: B024
         finally:
             await self.on_stop()
 
-    async def on_stop(self) -> None:  # noqa: B027
+    async def on_stop(self) -> None:
         """Call after command executed."""
         ...
 
@@ -622,7 +621,7 @@ class Command(abc.ABC):  # noqa: B024
 
     def run_using_worker(self, *args: Any, **kwargs: Any) -> NoReturn:
         """Execute command using :class:`faust.Worker`."""
-        loop = asyncio.get_event_loop_policy().get_event_loop()
+        loop = asyncio.get_event_loop()
         args = self.args + args
         kwargs = {**self.kwargs, **kwargs}
         service = self.as_service(loop, *args, **kwargs)
@@ -630,7 +629,7 @@ class Command(abc.ABC):  # noqa: B024
         self.on_worker_created(worker)
         raise worker.execute_from_commandline()
 
-    def on_worker_created(self, worker: Worker) -> None:  # noqa: B027
+    def on_worker_created(self, worker: Worker) -> None:
         """Call when creating :class:`faust.Worker` to execute this command."""
         ...
 
@@ -641,7 +640,7 @@ class Command(abc.ABC):  # noqa: B024
         return Service.from_awaitable(
             self.execute(*args, **kwargs),
             name=type(self).__name__,
-            loop=loop or asyncio.get_event_loop_policy().get_event_loop(),
+            loop=loop or asyncio.get_event_loop(),
         )
 
     def worker_for_service(
@@ -660,7 +659,7 @@ class Command(abc.ABC):  # noqa: B024
             console_port=self.console_port,
             redirect_stdouts=self.redirect_stdouts or False,
             redirect_stdouts_level=self.redirect_stdouts_level,
-            loop=loop or asyncio.get_event_loop_policy().get_event_loop(),
+            loop=loop or asyncio.get_event_loop(),
             daemon=self.daemon,
         )
 

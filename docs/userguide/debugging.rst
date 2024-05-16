@@ -27,7 +27,7 @@ You can also install it as part of a :ref:`bundle <bundles>`:
 
 .. sourcecode:: console
 
-    $ pip install -U faust-streaming[debug]
+    $ pip install -U faust[debug]
 
 
 After :pypi:`aiomonitor` is installed you may start the worker with the

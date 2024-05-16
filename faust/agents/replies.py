@@ -1,5 +1,4 @@
 """Agent replies: waiting for replies, sending them, etc."""
-
 import asyncio
 from collections import defaultdict
 from typing import Any, AsyncIterator, MutableMapping, MutableSet, NamedTuple, Optional
@@ -34,7 +33,8 @@ class ReplyPromise(asyncio.Future):
         self.__post_init__()
         super().__init__(**kwargs)
 
-    def __post_init__(self) -> None: ...
+    def __post_init__(self) -> None:
+        ...
 
     def _verify_correlation_id(self, correlation_id: str) -> None:
         if not correlation_id:
@@ -175,7 +175,6 @@ class ReplyConsumer(Service):
             # declare the topic
             topic = self._reply_topic(topic_name)
             await topic.maybe_declare()
-            self.app.topics.add(topic)
             await self.sleep(3.0)
             # then create the future
             self._fetchers[topic_name] = self.add_future(self._drain_replies(topic))

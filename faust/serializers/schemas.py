@@ -27,7 +27,8 @@ OnKeyDecodeErrorFun = Callable[[Exception, Message], Awaitable[None]]
 OnValueDecodeErrorFun = Callable[[Exception, Message], Awaitable[None]]
 
 
-async def _noop_decode_error(exc: Exception, message: Message) -> None: ...
+async def _noop_decode_error(exc: Exception, message: Message) -> None:
+    ...
 
 
 class Schema(SchemaT):

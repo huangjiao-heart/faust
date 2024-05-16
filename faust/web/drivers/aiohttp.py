@@ -1,5 +1,4 @@
 """Web driver using :pypi:`aiohttp`."""
-
 from pathlib import Path
 from typing import Any, Callable, Mapping, MutableMapping, Optional, Union, cast
 

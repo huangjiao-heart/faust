@@ -1,5 +1,4 @@
 """Aerospike storage."""
-
 import time
 import typing
 from typing import Any, Dict, Iterator, Optional, Tuple, Union
@@ -43,7 +42,7 @@ class AeroSpikeStore(base.SerializedStore):
     ttl: int
     policies: typing.Mapping[str, Any]
     BIN_KEY = "value_key"
-    USERNAME_KEY: str = "user"
+    USERNAME_KEY: str = "username"
     HOSTS_KEY: str = "hosts"
     PASSWORD_KEY: str = "password"  # nosec
     NAMESPACE_KEY: str = "namespace"
@@ -77,18 +76,14 @@ class AeroSpikeStore(base.SerializedStore):
         if aerospike_client:
             return aerospike_client
         else:
-            client_config: Dict[Any, Any] = aerospike_config.get(
-                AeroSpikeStore.CLIENT_OPTIONS_KEY, {}
+            client = aerospike.client(
+                aerospike_config.get(AeroSpikeStore.CLIENT_OPTIONS_KEY)
             )
-            client_config[AeroSpikeStore.USERNAME_KEY] = aerospike_config.get(
-                AeroSpikeStore.USERNAME_KEY, None
-            )
-            client_config[AeroSpikeStore.PASSWORD_KEY] = aerospike_config.get(
-                AeroSpikeStore.PASSWORD_KEY, None
-            )
-
             try:
-                client = aerospike.client(client_config)
+                client.connect(
+                    aerospike_config.get(AeroSpikeStore.USERNAME_KEY),
+                    aerospike_config.get(AeroSpikeStore.PASSWORD_KEY),
+                )
                 aerospike_client = client
                 return client
             except Exception as e:

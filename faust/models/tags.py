@@ -47,10 +47,12 @@ class Tag(Generic[T]):
         return f"<{self._name}: {self.field}@{id(self):#x}>"
 
     @abc.abstractmethod
-    def __str__(self) -> str: ...
+    def __str__(self) -> str:
+        ...
 
     @abc.abstractmethod
-    def __format__(self, format_spec: str) -> str: ...
+    def __format__(self, format_spec: str) -> str:
+        ...
 
     @property
     def _name(self) -> str:
@@ -77,6 +79,7 @@ class TransparentTag(Tag[T]):
 
 
 class _FrameLocal(UserString, Generic[T]):
+
     _field_name: str
     _tag_type: str
     _frame: str
@@ -188,16 +191,21 @@ class Sensitive(OpaqueTag[T]):
         return sup(params)
 
 
-class _PIIstr(str): ...
+class _PIIstr(str):
+    ...
 
 
-class _PIIbytes(bytes): ...
+class _PIIbytes(bytes):
+    ...
 
 
-class _PIIint(int): ...
+class _PIIint(int):
+    ...
 
 
-class _PIIfloat(float): ...
+class _PIIfloat(float):
+    ...
 
 
-class _PIIDecimal(Decimal): ...
+class _PIIDecimal(Decimal):
+    ...

@@ -1,6 +1,4 @@
 """Transport utils - scheduling."""
-
-from collections import OrderedDict
 from typing import (
     Any,
     Dict,
@@ -12,6 +10,8 @@ from typing import (
     Set,
     Tuple,
 )
+
+from mode.utils.compat import OrderedDict
 
 from faust.types import TP
 from faust.types.transports import SchedulingStrategyT

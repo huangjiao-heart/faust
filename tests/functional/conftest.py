@@ -1,17 +1,15 @@
 import logging as _logging
 import os
-import sys
 from copy import copy
 from typing import IO, Dict, NamedTuple, Union
-from unittest.mock import Mock
 
 import pytest
 from mode.utils.logging import setup_logging
+from mode.utils.mocks import AsyncMock, Mock
 
 import faust
 from faust.utils.tracing import set_current_span
 from faust.web.cache.backends.memory import CacheStorage
-from tests.helpers import AsyncMock
 
 
 class AppMarks(NamedTuple):
@@ -72,43 +70,26 @@ def logging(request):
             **((marks.kwargs or {}) if marks else {}),
         }
     )
-    # acquireLock() is removed in Python 3.13
-    if sys.version_info < (3, 13):
-        _logging._acquireLock()
-        try:
-            prev_state = copy(_logging.Logger.manager.loggerDict)
-            prev_handlers = copy(_logging.root.handlers)
-        finally:
-            _logging._releaseLock()
-        try:
-            setup_logging(
-                logfile=options.logfile,
-                loglevel=options.loglevel,
-                logging_config=options.logging_config,
-            )
-            yield
-        finally:
-            _logging._acquireLock()
-            try:
-                _logging.Logger.manager.loggerDict = prev_state
-                _logging.root.handlers = prev_handlers
-            finally:
-                _logging._releaseLock()
-    else:
-        with _logging._lock:
-            prev_state = copy(_logging.Logger.manager.loggerDict)
-            prev_handlers = copy(_logging.root.handlers)
-
+    _logging._acquireLock()
+    try:
+        prev_state = copy(_logging.Logger.manager.loggerDict)
+        prev_handlers = copy(_logging.root.handlers)
+    finally:
+        _logging._releaseLock()
+    try:
         setup_logging(
             logfile=options.logfile,
             loglevel=options.loglevel,
             logging_config=options.logging_config,
         )
         yield
-
-        with _logging._lock:
+    finally:
+        _logging._acquireLock()
+        try:
             _logging.Logger.manager.loggerDict = prev_state
             _logging.root.handlers = prev_handlers
+        finally:
+            _logging._releaseLock()
 
 
 @pytest.fixture()

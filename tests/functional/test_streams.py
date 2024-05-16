@@ -1,16 +1,14 @@
 import asyncio
-import platform
 from copy import copy
-from unittest.mock import Mock, patch
 
 import pytest
 from mode import label
 from mode.utils.aiter import aiter, anext
+from mode.utils.mocks import AsyncMock, Mock
 
 import faust
 from faust.exceptions import ImproperlyConfigured
 from faust.streams import maybe_forward
-from tests.helpers import AsyncMock
 
 from .helpers import channel_empty, message, put
 
@@ -40,9 +38,6 @@ def _prepare_app(app):
     return app
 
 
-@pytest.mark.skipif(
-    platform.python_implementation() == "PyPy", reason="Not yet supported on PyPy"
-)
 @pytest.mark.asyncio
 @pytest.mark.allow_lingering_tasks(count=1)
 async def test_simple(app, loop):
@@ -54,9 +49,6 @@ async def test_simple(app, loop):
         assert await channel_empty(stream.channel)
 
 
-@pytest.mark.skipif(
-    platform.python_implementation() == "PyPy", reason="Not yet supported on PyPy"
-)
 @pytest.mark.asyncio
 async def test_async_iterator(app):
     async with new_stream(app) as stream:
@@ -71,9 +63,6 @@ async def test_async_iterator(app):
         assert await channel_empty(stream.channel)
 
 
-@pytest.mark.skipif(
-    platform.python_implementation() == "PyPy", reason="Not yet supported on PyPy"
-)
 @pytest.mark.asyncio
 async def test_throw(app):
     async with new_stream(app) as stream:
@@ -85,9 +74,6 @@ async def test_throw(app):
             await anext(streamit)
 
 
-@pytest.mark.skipif(
-    platform.python_implementation() == "PyPy", reason="Not yet supported on PyPy"
-)
 @pytest.mark.asyncio
 async def test_enumerate(app):
     async with new_stream(app) as stream:
@@ -102,9 +88,6 @@ async def test_enumerate(app):
         assert await channel_empty(stream.channel)
 
 
-@pytest.mark.skipif(
-    platform.python_implementation() == "PyPy", reason="Not yet supported on PyPy"
-)
 @pytest.mark.asyncio
 async def test_items(app):
     async with new_stream(app) as stream:
@@ -120,9 +103,6 @@ async def test_items(app):
         assert await channel_empty(stream.channel)
 
 
-@pytest.mark.skipif(
-    platform.python_implementation() == "PyPy", reason="Not yet supported on PyPy"
-)
 @pytest.mark.asyncio
 async def test_through(app):
     app._attachments.enabled = False
@@ -255,36 +235,6 @@ async def test_stream_filter_acks_filtered_out_messages(app, event_loop):
     assert len(app.consumer.unacked) == 0
 
 
-@pytest.mark.skipif(
-    platform.python_implementation() == "PyPy", reason="Not yet supported on PyPy"
-)
-@pytest.mark.asyncio
-async def test_acks_filtered_out_messages_when_using_take(app, event_loop):
-    """
-    Test the filter function acknowledges the filtered out messages when using take().
-    """
-    initial_values = [1000, 999, 3000, 99, 5000, 3, 9999]
-    expected_values = [v for v in initial_values if v > 1000]
-    original_function = app.create_event
-    # using patch to intercept message objects, to check if they are acked later
-    with patch("faust.app.base.App.create_event") as create_event_mock:
-        create_event_mock.side_effect = original_function
-        async with new_stream(app) as stream:
-            for value in initial_values:
-                await stream.channel.send(value=value)
-            async for values in stream.filter(lambda x: x > 1000).take(
-                len(expected_values), within=5
-            ):
-                assert values == expected_values
-                break
-    messages = [call[0][3] for call in create_event_mock.call_args_list]
-    acked = [m.acked for m in messages if m.acked]
-    assert len(acked) == len(initial_values)
-
-
-@pytest.mark.skipif(
-    platform.python_implementation() == "PyPy", reason="Not yet supported on PyPy"
-)
 @pytest.mark.asyncio
 async def test_events(app):
     async with new_stream(app) as stream:
@@ -321,9 +271,6 @@ def assert_events_acked(events):
         raise
 
 
-@pytest.mark.skipif(
-    platform.python_implementation() == "PyPy", reason="Not yet supported on PyPy"
-)
 class Test_chained_streams:
     def _chain(self, app):
         root = new_stream(app)
@@ -427,9 +374,6 @@ class Test_chained_streams:
             assert node._stopped.is_set()
 
 
-@pytest.mark.skipif(
-    platform.python_implementation() == "PyPy", reason="Not yet supported on PyPy"
-)
 @pytest.mark.asyncio
 async def test_start_and_stop_Stream(app):
     s = new_topic_stream(app)
@@ -445,9 +389,6 @@ async def _start_stop_stream(stream):
     await stream.stop()
 
 
-@pytest.mark.skipif(
-    platform.python_implementation() == "PyPy", reason="Not yet supported on PyPy"
-)
 @pytest.mark.asyncio
 async def test_ack(app):
     async with new_stream(app) as s:
@@ -473,9 +414,6 @@ async def test_ack(app):
             assert not event.message.refcount
 
 
-@pytest.mark.skipif(
-    platform.python_implementation() == "PyPy", reason="Not yet supported on PyPy"
-)
 @pytest.mark.asyncio
 async def test_noack(app):
     async with new_stream(app) as s:
@@ -496,9 +434,6 @@ async def test_noack(app):
         event.ack.assert_not_called()
 
 
-@pytest.mark.skipif(
-    platform.python_implementation() == "PyPy", reason="Not yet supported on PyPy"
-)
 @pytest.mark.asyncio
 async def test_acked_when_raising(app):
     async with new_stream(app) as s:
@@ -536,9 +471,6 @@ async def test_acked_when_raising(app):
             assert not event2.message.refcount
 
 
-@pytest.mark.skipif(
-    platform.python_implementation() == "PyPy", reason="Not yet supported on PyPy"
-)
 @pytest.mark.asyncio
 @pytest.mark.allow_lingering_tasks(count=1)
 async def test_maybe_forward__when_event(app):
@@ -551,9 +483,6 @@ async def test_maybe_forward__when_event(app):
         s.channel.send.assert_not_called()
 
 
-@pytest.mark.skipif(
-    platform.python_implementation() == "PyPy", reason="Not yet supported on PyPy"
-)
 @pytest.mark.asyncio
 async def test_maybe_forward__when_concrete_value(app):
     s = new_stream(app)

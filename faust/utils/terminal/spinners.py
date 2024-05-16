@@ -1,5 +1,4 @@
 """Terminal progress bar spinners."""
-
 import atexit
 import logging
 import random
@@ -60,7 +59,7 @@ SPINNERS: Sequence[Sequence[str]] = [
     SPINNER_MOON,
 ]
 
-ACTIVE_SPINNER: Sequence[str] = random.choice(SPINNERS)  # nosec B311
+ACTIVE_SPINNER: Sequence[str] = random.choice(SPINNERS)
 
 
 class Spinner:

@@ -1,5 +1,4 @@
 """Faust exceptions."""
-
 import typing
 
 __all__ = [
@@ -26,7 +25,8 @@ if typing.TYPE_CHECKING:
     from .types.models import FieldDescriptorT as _FieldDescriptorT
 else:
 
-    class _FieldDescriptorT: ...  # noqa
+    class _FieldDescriptorT:
+        ...  # noqa
 
 
 class FaustError(Exception):

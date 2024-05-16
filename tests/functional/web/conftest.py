@@ -1,6 +1,5 @@
-from unittest.mock import Mock
-
 import pytest
+from mode.utils.mocks import Mock
 
 from faust.exceptions import SameNode
 

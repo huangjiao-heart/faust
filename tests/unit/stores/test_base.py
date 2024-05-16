@@ -1,7 +1,6 @@
-from unittest.mock import Mock
-
 import pytest
 from mode import label
+from mode.utils.mocks import Mock
 
 from faust import Event, Table
 from faust.stores.base import SerializedStore, Store
@@ -9,30 +8,39 @@ from faust.types import TP
 
 
 class MyStore(Store):
-    def __getitem__(self, key): ...
+    def __getitem__(self, key):
+        ...
 
-    def __setitem__(self, key, value): ...
+    def __setitem__(self, key, value):
+        ...
 
-    def __delitem__(self, key): ...
+    def __delitem__(self, key):
+        ...
 
-    def __iter__(self): ...
+    def __iter__(self):
+        ...
 
-    def __len__(self): ...
+    def __len__(self):
+        ...
 
-    def apply_changelog_batch(self, *args, **kwargs): ...
+    def apply_changelog_batch(self, *args, **kwargs):
+        ...
 
-    def reset_state(self): ...
+    def reset_state(self):
+        ...
 
     async def backup_partition(
         self, tp, flush: bool = True, purge: bool = False, keep: int = 1
-    ) -> None: ...
+    ) -> None:
+        ...
 
     def restore_backup(
         self,
         tp,
         latest: bool = True,
         backup_id: int = 0,
-    ) -> None: ...
+    ) -> None:
+        ...
 
 
 class Test_Store:
@@ -122,18 +130,21 @@ class MySerializedStore(SerializedStore):
     def _clear(self):
         self.keep.clear()
 
-    def reset_state(self): ...
+    def reset_state(self):
+        ...
 
     async def backup_partition(
         self, tp, flush: bool = True, purge: bool = False, keep: int = 1
-    ) -> None: ...
+    ) -> None:
+        ...
 
     def restore_backup(
         self,
         tp,
         latest: bool = True,
         backup_id: int = 0,
-    ) -> None: ...
+    ) -> None:
+        ...
 
 
 class Test_SerializedStore:

@@ -1,5 +1,4 @@
 """Program ``faust models`` used to list models available."""
-
 from operator import attrgetter
 from typing import Any, Callable, Sequence, Type, cast
 

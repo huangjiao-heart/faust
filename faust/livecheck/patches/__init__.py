@@ -1,5 +1,4 @@
 """Patches - LiveCheck integration with other frameworks/libraries."""
-
 from . import aiohttp
 
 __all__ = ["aiohttp", "patch_all"]

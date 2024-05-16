@@ -1,5 +1,4 @@
 """Program ``faust model`` used to list details about a model."""
-
 from datetime import datetime
 from typing import Any, Optional, Sequence, Type
 
@@ -59,7 +58,7 @@ class model(AppCommand):
         alt = text.didyoumean(
             registry,
             lookup,
-            fmt_none=f'Please run "{self.prog_name} models" for a list.',
+            fmt_none=f"Please run `{self.prog_name} models` for a list.",
         )
         return click.UsageError(f"No model {name!r}. {alt}")
 

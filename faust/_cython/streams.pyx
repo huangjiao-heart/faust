@@ -109,7 +109,8 @@ cdef class StreamIterator:
             object consumer
         consumer = self.consumer
         last_stream_to_ack = False
-        if do_ack and event is not None:
+        # if do_ack and event is not None:
+        if event is not None and (do_ack or event.value is self._skipped_value):
             message = event.message
             if not message.acked:
                 refcount = message.refcount
@@ -179,8 +180,8 @@ cdef class StreamIterator:
                 self.add_unacked(message)
                 self.on_message_in(tp, offset, message)
 
-            stream_state = self.on_stream_event_in(
-                tp, offset, self.stream, event)
+                stream_state = self.on_stream_event_in(
+                    tp, offset, self.stream, event)
             self.stream._set_current_event(event)
             return (event, event.value, stream_state)
         else:

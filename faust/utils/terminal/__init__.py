@@ -1,5 +1,4 @@
 """Terminal utilities."""
-
 from mode.utils.compat import isatty
 
 from .spinners import Spinner, SpinnerHandler

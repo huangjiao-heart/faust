@@ -1,13 +1,12 @@
 import asyncio
 import collections.abc
-from unittest.mock import Mock
 
 import pytest
+from mode.utils.mocks import AsyncMock, Mock
 
 from faust.agents import Agent
 from faust.agents.actor import Actor, AsyncIterableActor, AwaitableActor
 from faust.types import TP
-from tests.helpers import AsyncMock
 
 
 class FakeActor(Actor):
@@ -18,6 +17,7 @@ class FakeActor(Actor):
 
 
 class Test_Actor:
+
     ActorType = FakeActor
 
     @pytest.fixture()
@@ -93,6 +93,7 @@ class Test_Actor:
 
 
 class Test_AsyncIterableActor(Test_Actor):
+
     ActorType = AsyncIterableActor
 
     def test_aiter(self, *, actor, it):
@@ -102,6 +103,7 @@ class Test_AsyncIterableActor(Test_Actor):
 
 
 class Test_AwaitableActor(Test_Actor):
+
     ActorType = AwaitableActor
 
     def test_await(self, *, actor, it):
