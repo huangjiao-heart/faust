@@ -1201,7 +1201,7 @@ class Consumer(Service, ConsumerT):
                             if commit_every is not None and self.enable_auto_commit:
                                 if self._n_acked >= commit_every:
                                     self._n_acked = 0
-                                    await self.commit()
+                                    # await self.commit()
                             await self.wait_first(
                                 callback(message), self.suspend_flow.wait()
                             )
