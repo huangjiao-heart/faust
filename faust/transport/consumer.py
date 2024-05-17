@@ -1208,7 +1208,7 @@ class Consumer(Service, ConsumerT):
                                 if acks_enabled:
                                     await self._add_gap(tp, r_offset + 1, offset)
                             if commit_every is not None:
-                                if self._n_acked >= commit_every:
+                                if self._n_acked >= commit_every and self.enable_auto_commit:
                                     self._n_acked = 0
                                     await self.commit()
                             await self.wait_first(
