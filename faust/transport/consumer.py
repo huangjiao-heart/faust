@@ -890,11 +890,11 @@ class Consumer(Service, ConsumerT):
             self.log.info("_commit_handler enable_auto_commit is False")
             return
         self.log.info("_commit_handler")
-        # interval = self.commit_interval
+        interval = self.commit_interval
 
-        # await self.sleep(interval)
-        # async for sleep_time in self.itertimer(interval, name="commit"):
-        #     await self.commit()
+        await self.sleep(interval)
+        async for sleep_time in self.itertimer(interval, name="commit"):
+            await self.commit()
 
     @Service.task
     async def _commit_livelock_detector(self) -> None:  # pragma: no cover
@@ -1198,7 +1198,7 @@ class Consumer(Service, ConsumerT):
                                 acks_enabled = acks_enabled_for(message.topic)
                                 if acks_enabled:
                                     await self._add_gap(tp, r_offset + 1, offset)
-                            if commit_every is not None:
+                            if commit_every is not None and self.enable_auto_commit:
                                 if self._n_acked >= commit_every:
                                     self._n_acked = 0
                                     await self.commit()
