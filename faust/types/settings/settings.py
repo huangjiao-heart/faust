@@ -1104,6 +1104,12 @@ class Settings(base.SettingsRegistry):
         Options include 'earliest', 'latest', 'none'.
         """
 
+    @sections.Consumer.setting(
+        params.Bool,
+        version_introduced="0.8.10",
+        env_name="ENABLE_AUTO_COMMIT",
+        default="False",
+    )
     def enable_auto_commit(self) -> bool:
         """enable auto commit.
         """
