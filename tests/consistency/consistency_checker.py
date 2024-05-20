@@ -48,6 +48,7 @@ class BaseKafkaTableBuilder(object):
                 loop=self.loop,
                 bootstrap_servers=bootstrap_servers,
                 auto_offset_reset="earliest",
+                enable_auto_commit=False,
             )
             await self.consumer.start()
             self._assignment = self.consumer.assignment()

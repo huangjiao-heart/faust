@@ -1127,7 +1127,8 @@ class Stream(StreamT[T_co], Service):
                     # otherwise the lag would increase
                     if event is not None and (do_ack or value is skipped_value):
                         # This inlines self.ack
-                        last_stream_to_ack = event.ack()
+                        # last_stream_to_ack = event.ack()
+                        last_stream_to_ack = event
                         message = event.message
                         tp = event.message.tp
                         offset = event.message.offset

@@ -886,15 +886,15 @@ class Consumer(Service, ConsumerT):
 
     @Service.task
     async def _commit_handler(self) -> None:
-        if not self.enable_auto_commit:
-            self.log.info("_commit_handler enable_auto_commit is False")
-            return
+        # if not self.enable_auto_commit:
+        #     self.log.info("_commit_handler enable_auto_commit is False")
+        #     return
         self.log.info("_commit_handler")
-        # interval = self.commit_interval
-        #
-        # await self.sleep(interval)
-        # async for sleep_time in self.itertimer(interval, name="commit"):
-        #     await self.commit()
+        interval = self.commit_interval
+
+        await self.sleep(interval)
+        async for sleep_time in self.itertimer(interval, name="commit"):
+            await self.commit()
 
     @Service.task
     async def _commit_livelock_detector(self) -> None:  # pragma: no cover
@@ -964,6 +964,8 @@ class Consumer(Service, ConsumerT):
     async def force_commit(
         self, topics: TPorTopicSet = None, start_new_transaction: bool = True
     ) -> bool:
+        # if not self.enable_auto_commit:
+        #     return False
         """Force offset commit."""
         sensor_state = self.app.sensors.on_commit_initiated(self)
 
@@ -1198,10 +1200,11 @@ class Consumer(Service, ConsumerT):
                                 acks_enabled = acks_enabled_for(message.topic)
                                 if acks_enabled:
                                     await self._add_gap(tp, r_offset + 1, offset)
-                            if commit_every is not None and self.enable_auto_commit:
+                            if commit_every is not None:
                                 if self._n_acked >= commit_every:
                                     self._n_acked = 0
-                                    # await self.commit()
+                                    if self.enable_auto_commit:
+                                        await self.commit()
                             await self.wait_first(
                                 callback(message), self.suspend_flow.wait()
                             )
