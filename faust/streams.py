@@ -374,8 +374,8 @@ class Stream(StreamT[T_co], Service):
                         yield list(buffer)
                     finally:
                         buffer.clear()
-                        for event in events:
-                            await self.ack(event)
+                        # for event in events:
+                        #     await self.ack(event)
                         events.clear()
                         # allow writing to buffer again
                         notify(buffer_consuming)
