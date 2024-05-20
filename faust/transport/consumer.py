@@ -96,6 +96,7 @@ from faust.types.tuples import FutureMessage
 from faust.utils import terminal
 from faust.utils.functional import consecutive_numbers
 from faust.utils.tracing import traced_from_parent_span
+import traceback
 
 if typing.TYPE_CHECKING:  # pragma: no cover
     from faust.app import App as _App
@@ -813,6 +814,8 @@ class Consumer(Service, ConsumerT):
             message.acked = True
             tp = message.tp
             offset = message.offset
+            APP_LOG.info(f"ack:self.app.topics.acks_enabled_for({offset}),{self.app.topics.acks_enabled_for(message.topic)}")
+            traceback.print_stack()
             if self.app.topics.acks_enabled_for(message.topic):
                 committed = self._committed_offset[tp]
                 try:
@@ -1081,6 +1084,60 @@ class Consumer(Service, ConsumerT):
         committed = self._committed_offset[tp]
         return committed is None or bool(offset) and offset > committed
 
+    # def _new_offset(self, tp: TP) -> Optional[int]:
+    #     # get the new offset for this tp, by going through
+    #     # its list of acked messages.
+    #     acked = self._acked[tp]
+    #
+    #     # We iterate over it until we find a gap
+    #     # then return the offset before that.
+    #     # For example if acked[tp] is:
+    #     #   1 2 3 4 5 6 7 8 9
+    #     # the return value will be: 10
+    #     # If acked[tp] is:
+    #     #  34 35 36 40 41 42 43 44
+    #     #          ^--- gap
+    #     # the return value will be: 37
+    #     if acked:
+    #         max_offset = max(acked)
+    #         gap_for_tp: IntervalTree = self._gap[tp]
+    #         if gap_for_tp:
+    #             # find all the ranges up to the max of acked, add them in to acked,
+    #             # and chop them off the gap.
+    #             candidates = gap_for_tp.overlap(0, max_offset)
+    #             # note: merge_overlaps will sort the intervaltree and will ensure that
+    #             # the intervals left over don't overlap each other. So can sort by their
+    #             # start without worrying about ends overlapping.
+    #             sorted_candidates = sorted(candidates, key=lambda x: x.begin)
+    #             if sorted_candidates:
+    #                 stuff_to_add = []
+    #                 for entry in sorted_candidates:
+    #                     stuff_to_add.extend(range(entry.begin, entry.end))
+    #                 new_max_offset = max(stuff_to_add[-1], max_offset + 1)
+    #                 acked.extend(stuff_to_add)
+    #                 gap_for_tp.chop(0, new_max_offset)
+    #         acked.sort()
+    #
+    #         # We iterate over it until we handle gap in the head of acked queue
+    #         # then return the previous committed offset.
+    #         # For example if acked[tp] is:
+    #         #    34 35 36 37
+    #         #  ^-- gap
+    #         # self._committed_offset[tp] is 31
+    #         # the return value will be None (the same as 31)
+    #         if self._committed_offset[tp]:
+    #             if min(acked) - self._committed_offset[tp] > 0:
+    #                 return None
+    #
+    #         # Note: acked is always kept sorted.
+    #         # find first list of consecutive numbers
+    #         batch = next(consecutive_numbers(acked))
+    #         # remove them from the list to clean up.
+    #         acked[: len(batch)] = []
+    #         self._acked_index[tp].difference_update(batch)
+    #         # return the highest commit offset
+    #         return batch[-1] + 1
+    #     return None
     def _new_offset(self, tp: TP) -> Optional[int]:
         # get the new offset for this tp, by going through
         # its list of acked messages.
@@ -1090,51 +1147,76 @@ class Consumer(Service, ConsumerT):
         # then return the offset before that.
         # For example if acked[tp] is:
         #   1 2 3 4 5 6 7 8 9
-        # the return value will be: 10
+        # the return value will be: 9
         # If acked[tp] is:
         #  34 35 36 40 41 42 43 44
         #          ^--- gap
-        # the return value will be: 37
+        # the return value will be: 36
         if acked:
             max_offset = max(acked)
-            gap_for_tp: IntervalTree = self._gap[tp]
+            # APP_LOG.info(f"_new_offset,max_offset:{max_offset}")
+            gap_for_tp = self._gap[tp]
+            # print(f"gap_for_tp{tp}:{gap_for_tp[:30]},{gap_for_tp[-20:]},len:{len(gap_for_tp)}")
+            # APP_LOG.info(f"_new_offset,gap_for_tp:{gap_for_tp}")
             if gap_for_tp:
-                # find all the ranges up to the max of acked, add them in to acked,
-                # and chop them off the gap.
-                candidates = gap_for_tp.overlap(0, max_offset)
-                # note: merge_overlaps will sort the intervaltree and will ensure that
-                # the intervals left over don't overlap each other. So can sort by their
-                # start without worrying about ends overlapping.
-                sorted_candidates = sorted(candidates, key=lambda x: x.begin)
-                if sorted_candidates:
-                    stuff_to_add = []
-                    for entry in sorted_candidates:
-                        stuff_to_add.extend(range(entry.begin, entry.end))
-                    new_max_offset = max(stuff_to_add[-1], max_offset + 1)
-                    acked.extend(stuff_to_add)
-                    gap_for_tp.chop(0, new_max_offset)
-            acked.sort()
-
-            # We iterate over it until we handle gap in the head of acked queue
-            # then return the previous committed offset.
-            # For example if acked[tp] is:
-            #    34 35 36 37
-            #  ^-- gap
-            # self._committed_offset[tp] is 31
-            # the return value will be None (the same as 31)
-            if self._committed_offset[tp]:
-                if min(acked) - self._committed_offset[tp] > 0:
-                    return None
-
+                gap_index = next((i for i, x in enumerate(gap_for_tp)
+                                  if x > max_offset), len(gap_for_tp))
+                # APP_LOG.info(f"_new_offset,gap_index:{gap_index}")
+                gaps = gap_for_tp[:gap_index]
+                # APP_LOG.info(f"_new_offset,gaps:{gaps}")
+                acked.extend(gaps)
+                gap_for_tp[:gap_index] = []
+            acked_move = list(set(acked))
+            acked_move.sort()
+            # print(f"new_offset{tp}:{acked[:30]}.{acked[-20:]},len:{len(acked)}")
             # Note: acked is always kept sorted.
             # find first list of consecutive numbers
-            batch = next(consecutive_numbers(acked))
+            # APP_LOG.info(f"_new_offset,acked:{acked_move[:20]},end_acked:{acked_move[-20:]},{len(acked_move)}")
+            len_acked = len(acked_move)
+            batch = next(consecutive_numbers(acked_move))
+            len_batch = len(batch)
+            # APP_LOG.info(f"_new_offset,batch:{batch[:20]},{len(batch)}")
             # remove them from the list to clean up.
-            acked[: len(batch)] = []
-            self._acked_index[tp].difference_update(batch)
+            # APP_LOG.info(f"_new_offset,acked[:len(batch) - 1]:{acked[:len(batch) - 1]}")
+            # acked[:len(batch) - 1] = []
+            acked_move[:len(batch) - 1] = []
+            acked_move[1:] = []
+            self._acked[tp] = acked_move
+            # APP_LOG.info(f"_new_offset,{tp},acked_move:{acked_move},len_batch={len_batch},len_acked={len_acked}")
+            # self._acked_index[tp].difference_update(batch)
+            self._acked_index[tp].difference_update(acked)
             # return the highest commit offset
-            return batch[-1] + 1
+            # APP_LOG.info(f"_new_offset,_acked_index2:{self._acked_index[tp]}")
+            # APP_LOG.info(f"_new_offset,batch[-1]:{batch[-1]}")
+            # APP_LOG.info(f"_new_offset,acked:{acked[:20]},{len(acked)}")
+            # return batch[-1]
+            # if len_acked != len_batch:
+            #     APP_LOG.info(f"_new_offset,{tp},batch={batch[-1] + 1}")
+            #     loop = asyncio.ge
+            #     loop.run_until_complete(self.seek(tp, batch[-1] + 1))
+            # APP_LOG.info(
+            #     f"_new_offset,{tp},offset={self.seek_offsets},INDEX={list(self._acked_index[tp])[:20]},
+            #     INDEX_END={list(self._acked_index[tp])[-20:]}")
+            # APP_LOG.info(
+            #     f"_new_offset,{tp},add_offsets={self.seek_offsets},committed_offset:
+            #     {self._committed_offset.get(tp)}if={len_acked != len_batch and tp not in self.seek_offsets}")
+            if len_acked != len_batch:
+                committed_offset = self._committed_offset.get(tp, 0)
+                if batch[-1] < committed_offset:
+                    self.add_seek_offsets(tp, committed_offset)
+                    self._acked[tp] = [committed_offset]
+                else:
+                    self.add_seek_offsets(tp, batch[-1])
+            return batch[-1]
         return None
+
+    def add_seek_offsets(self, tp, offset):
+        if tp in self.seek_offsets:
+            self.seek_offsets[tp]["now"] = offset
+            self.seek_offsets[tp]["count"] = self.seek_offsets[tp]["count"] + 1
+        else:
+            self.seek_offsets[tp] = {"pre": 0, "now": offset, "count": 0}
+        # APP_LOG.info(f"_new_offset,{tp},add_offsets={self.seek_offsets}")
 
     async def on_task_error(self, exc: BaseException) -> None:
         """Call when processing a message failed."""
@@ -1480,3 +1562,40 @@ class ThreadDelegateConsumer(Consumer):
 
     def verify_recovery_event_path(self, now: float, tp: TP) -> None:
         return self._thread.verify_recovery_event_path(now, tp)
+
+
+import logging
+import os
+from os import path
+from logging.handlers import RotatingFileHandler
+
+REGED_LOGGER = {}
+LOG_PATH = 'log'
+
+
+def get_logger(name):
+    if name not in REGED_LOGGER:
+        logpath = path.abspath(path.join("/usr/local/app/offset/", *name.split('.')))
+        if not path.exists(path.dirname(logpath)):
+            os.makedirs(path.dirname(logpath))
+        try:
+            import cloghandler
+            handler = cloghandler.ConcurrentRotatingFileHandler(logpath, maxBytes=20 * 1024 * 1024,
+                                                                backupCount=10, encoding='utf-8')
+        except ImportError:  # pylint: disable=broad-except
+            handler = RotatingFileHandler(logpath, maxBytes=10000000, backupCount=10, encoding='utf-8')
+
+        fmt = '[%(levelname)1.1s %(asctime)s %(module)s:%(lineno)d] %(message)s'
+        logging.basicConfig(format=fmt)
+        handler.setFormatter(logging.Formatter(fmt=fmt))
+        logger = logging.getLogger(name)
+        logger.setLevel(logging.DEBUG)
+        logger.addHandler(handler)
+        # logger.addFilter(RequestContextFilter())
+        REGED_LOGGER[name] = logger
+        return logger
+    else:
+        return REGED_LOGGER[name]
+
+
+APP_LOG = get_logger('offset')
