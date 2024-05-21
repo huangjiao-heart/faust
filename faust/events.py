@@ -265,6 +265,15 @@ class Event(EventT):
         """
         return self.message.ack(self.app.consumer)
 
+    def manual_ack(self) -> bool:
+        """Acknowledge event as being processed by stream.
+
+        When the last stream processor acks the message, the
+        offset in the source topic will be marked as safe-to-commit,
+        and the worker will commit and advance the committed offset.
+        """
+        return self.message.manual_ack(self.app.consumer)
+
     def __repr__(self) -> str:
         return f"<{type(self).__name__}: k={self.key!r} v={self.value!r}>"
 

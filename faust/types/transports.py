@@ -361,6 +361,10 @@ class ConsumerT(ServiceT):
         ...
 
     @abc.abstractmethod
+    def manual_ack(self, message: Message) -> bool:
+        ...
+
+    @abc.abstractmethod
     async def wait_empty(self) -> None:
         ...
 

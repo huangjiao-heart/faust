@@ -201,7 +201,19 @@ class Message:
                 return self.on_final_ack(consumer)
         return False
 
+    def manual_ack(self, consumer: _ConsumerT, n: int = 1) -> bool:
+        if not self.acked:
+            # if no more references, mark offset as safe-to-commit in
+            # Consumer.
+            if not self.decref(n):
+                return self.on_final_ack(consumer)
+        return False
+
     def on_final_ack(self, consumer: _ConsumerT) -> bool:
+        self.acked = True
+        return True
+
+    def on_final_manual_ack(self, consumer: _ConsumerT) -> bool:
         self.acked = True
         return True
 
@@ -241,6 +253,8 @@ class ConsumerMessage(Message):
     def on_final_ack(self, consumer: _ConsumerT) -> bool:
         return consumer.ack(self)
 
+    def on_final_manual_ack(self, consumer: _ConsumerT) -> bool:
+        return consumer.manual_ack(self)
 
 def tp_set_to_map(tps: Set[TP]) -> MutableMapping[str, Set[TP]]:
     # convert revoked/assigned to mapping of topic to partitions

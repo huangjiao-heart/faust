@@ -810,12 +810,35 @@ class Consumer(Service, ConsumerT):
 
     def ack(self, message: Message) -> bool:
         """Mark message as being acknowledged by stream."""
+        # if not message.acked:
+        #     message.acked = True
+        #     tp = message.tp
+        #     offset = message.offset
+        #     APP_LOG.info(f"ack:self.app.topics.acks_enabled_for({offset}),{self.app.topics.acks_enabled_for(message.topic)}")
+        #     if self.app.topics.acks_enabled_for(message.topic):
+        #         committed = self._committed_offset[tp]
+        #         try:
+        #             if committed is None or offset >= committed:
+        #                 acked_index = self._acked_index[tp]
+        #                 if offset not in acked_index:
+        #                     self._unacked_messages.discard(message)
+        #                     acked_index.add(offset)
+        #                     acked_for_tp = self._acked[tp]
+        #                     acked_for_tp.append(offset)
+        #                     self._n_acked += 1
+        #                     return True
+        #         finally:
+        #             notify(self._waiting_for_ack)
+        # return False
+        return True
+
+    def manual_ack(self, message: Message) -> bool:
+        """Mark message as being acknowledged by stream."""
         if not message.acked:
             message.acked = True
             tp = message.tp
             offset = message.offset
             APP_LOG.info(f"ack:self.app.topics.acks_enabled_for({offset}),{self.app.topics.acks_enabled_for(message.topic)}")
-            traceback.print_stack()
             if self.app.topics.acks_enabled_for(message.topic):
                 committed = self._committed_offset[tp]
                 try:
